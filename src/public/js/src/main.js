@@ -43,6 +43,9 @@ app.SetView = Backbone.View.extend({
         //with the passed set
         app.on("search:success", this.onSearchSuccess, this);
 
+        //handle search errors
+        app.on("search:error", this.onSearchError, this);
+
     },
 
     template: $('#set-template').html(),
@@ -53,22 +56,24 @@ app.SetView = Backbone.View.extend({
 
     onSearchStart: function() {
         this.$el.html('<div class="loader"><img src="images/loader.gif" width="80" height="80" alt="Loading..."></div>');
-        $('#setNumberSubmit').attr('disabled', 'disabled');
     },
 
     onSearchSuccess: function(set) {
-        $('#setNumberSubmit').prop('disabled', false);
         this.model = set;
         this.render();        
+    },
+
+    onSearchError: function(id) {
+        this.$el.html('<div class="error">An error occurred searching for this set.  Please check the set number and try again.');
     }
 });
 
-app.searchView = Backbone.View.extend({
+app.SearchView = Backbone.View.extend({
 
     tagName: "div",
     template: $('#controls-template').html(),
     events: {
-        'submit #searchSetsForm': 'onSearchSet'
+        'submit #searchSetsForm': 'onSearchSubmit'
     },
     initialize: function() {
 
@@ -79,7 +84,16 @@ app.searchView = Backbone.View.extend({
         app.on("setselection:user", function(id) {
             $('#setNumberInput').val(id);
             $('#searchSetsForm').submit();
-        });
+        }, this);
+
+        //handle search start event
+        app.on("search:start", this.onSearchStart, this);
+
+        //handle search success event
+        app.on("search:success", this.onSearchSuccess, this);        
+
+        //handle search error event
+        app.on("search:error", this.onSearchError, this);
 
     },
     render: function() {
@@ -87,35 +101,55 @@ app.searchView = Backbone.View.extend({
         return this;
     },
     
-    onSearchSet: function(e) {
+    onSearchSubmit: function(e) {
 
         e.preventDefault();
 
         var id = $('#setNumberInput').val();    
 
-        //broadcast the start of a new search
-        app.trigger("search:start", id);
-
         if (id && (id.length > 0)) {     
+
+            //broadcast the start of a new search
+            app.trigger("search:start", id);
+            
             var set = new app.Set({ id: id });
             set.fetch({
                 success: function(e) {
 
-                    //we want to update the imageUrl values here with a larger size than the one returned from the api
-                    var imageUrl = set.get('imageUrl').split("?")[0];
-                    imageUrl += "?w=960&h=600";
-                    set.set('imageUrl', imageUrl);
+                    if (set.get('boxNo') !== "") {
 
-                    app.trigger("search:success", set);
+                        //we want to update the imageUrl values here with a larger size than the one returned from the api
+                        var imageUrl = set.get('imageUrl').split("?")[0];
+                        imageUrl += "?w=960&h=600";
+                        set.set('imageUrl', imageUrl);
+
+                        app.trigger("search:success", set);
+
+                    } else {
+                        app.trigger("search:error", id);
+                    }
                 },
                 error: function(e) {
-                    console.log("fetch error");
+                    app.trigger("search:error", id);
                 }
             });
         } else {
             app.trigger("search:reset");
         }
+    },
+
+    onSearchStart: function() {
+        $('#setNumberSubmit').attr('disabled', 'disabled');
+    },
+
+    onSearchSuccess: function(set) {
+        $('#setNumberSubmit').prop('disabled', false);
+    },
+
+    onSearchError: function(id) {
+        $('#setNumberSubmit').prop('disabled', false);
     }
+
 });
 
 app.AvailableSetsView = Backbone.View.extend({
@@ -131,6 +165,13 @@ app.AvailableSetsView = Backbone.View.extend({
 
         //watch for searches
         app.on("search:start", this.onSearchStart, this);
+
+        //handle search reset
+        app.on("search:error", this.onSearchReset, this);  
+
+        //handle search errors
+        app.on("search:error", this.onSearchReset, this);        
+
     },
     render: function() {
         this.$el.html(_.template(this.template, this.model.toJSON()));
@@ -144,13 +185,17 @@ app.AvailableSetsView = Backbone.View.extend({
     },
 
     onSearchStart: function(id) {
-        $('#availableSets').val(id);
+        $('#availableSets').val(id); 
+    },
+
+    onSearchReset: function() {
+      $('#availableSets').val("0");   
     }
 });
 
 $(document).ready(function() {
 
-    var searchView = new app.searchView({ el: '#setsSearch' });    
+    var searchView = new app.SearchView({ el: '#setsSearch' });    
     var availableSetsView = new app.AvailableSetsView({ el: '#setsList', model: new app.AvailableSets });
     var setView = new app.SetView({ el: '#setContent' });
 
