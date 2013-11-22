@@ -4,7 +4,8 @@
   "description": "Search Cubiculus for LEGO building instructions",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "Ben Brewer",
   "license": "MIT",
