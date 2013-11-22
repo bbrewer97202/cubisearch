@@ -1,0 +1,22 @@
+{
+  "name": "Cubisearch",
+  "version": "0.0.0",
+  "authors": [
+    "Ben Brewer <bbrewer97202@yahoo.com>"
+  ],
+  "description": "Search Cubiculus for LEGO building instructions",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.5.2",
+    "backbone": "~1.1.0",
+    "jquery": "~2.0.3"
+  }
+}

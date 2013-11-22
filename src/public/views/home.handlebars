@@ -1,0 +1,41 @@
+<article class="cubisearch">
+    <h1>Cubisearch</h1>
+    <h2>Search Cubiculus for LEGO&reg; set details</h2>
+    <section class="controls">
+        <h3>Select a set or search by set number</h3>
+        <div class="control" id="setsList"></div>
+        <div class="control" id="setsSearch"></div>
+    </section>
+    <section id="setContent" class="setContent"></section>
+</article>
+<footer>
+    <p>All data and images from the great folks at <a href="http://www.cubiculus.com" target="_blank">http://www.cubiculus.com</a> and their API.</p>
+    <p>LEGO&reg; is a trademark of the LEGO&reg; Group, which does not sponsor, authorize or endorse this web site.</p>
+</footer>
+
+<!-- templates -->
+<script type="text/template" id="controls-template">    
+    <form name="searchSetsForm" id="searchSetsForm">
+        <input type="text" name="setNumberInput" id="setNumberInput" placeholder="Search for set by number">
+        <button id="setNumberSubmit">Search</button>
+    </form>
+</script>
+
+<script type="text/template" id="set-template">    
+    <h3><%= legoModelName %> (<%= boxNo %>)</h3>
+    <p><img src="<%= imageUrl %>" alt=""></p>
+    <p><%= description %></p>
+    <p><strong>Year released:</strong> <%= released %></p>
+    <p><strong>Number of pieces:</strong> <%= pieces %></p>
+</script>
+
+<script type="text/template" id="availableSets-template">    
+    <select class="availableSetsList" id="availableSets">
+        <option value="0">Select a known set</option>
+        <% for (var set in knownLegoSetsNumbers) { %>
+            <option value="<%= knownLegoSetsNumbers[set] %>"><%= knownLegoSetsNumbers[set] %></option>
+        <% } %>
+    </select>
+</script>
+
+<script type="text/javascript" src="js/script.js"></script>
